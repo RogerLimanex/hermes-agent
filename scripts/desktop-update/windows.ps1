@@ -1030,15 +1030,18 @@ function Invoke-HermesStep([string]$Exe, [string[]]$HermesArgs, [string]$Tag) {
     $savedPythonIoEncoding = $env:PYTHONIOENCODING
     $savedPythonUtf8 = $env:PYTHONUTF8
     $savedPythonUnbuffered = $env:PYTHONUNBUFFERED
+    $savedHandoffPid = $env:HERMES_UPDATE_HANDOFF_PID
     try {
         $env:PYTHONIOENCODING = "utf-8"
         $env:PYTHONUTF8 = "1"
         $env:PYTHONUNBUFFERED = "1"
+        if ($Tag -eq "update") { $env:HERMES_UPDATE_HANDOFF_PID = [string]$PID }
         $started = [HermesUpdateJob]::StartAssigned($Exe, $arguments)
     } finally {
         if ($null -eq $savedPythonIoEncoding) { Remove-Item Env:PYTHONIOENCODING -ErrorAction SilentlyContinue } else { $env:PYTHONIOENCODING = $savedPythonIoEncoding }
         if ($null -eq $savedPythonUtf8) { Remove-Item Env:PYTHONUTF8 -ErrorAction SilentlyContinue } else { $env:PYTHONUTF8 = $savedPythonUtf8 }
         if ($null -eq $savedPythonUnbuffered) { Remove-Item Env:PYTHONUNBUFFERED -ErrorAction SilentlyContinue } else { $env:PYTHONUNBUFFERED = $savedPythonUnbuffered }
+        if ($null -eq $savedHandoffPid) { Remove-Item Env:HERMES_UPDATE_HANDOFF_PID -ErrorAction SilentlyContinue } else { $env:HERMES_UPDATE_HANDOFF_PID = $savedHandoffPid }
     }
     $proc = $started.Process
     # C1 rule 6 + SPEC 5: the update child is the marker's delegate from its
